@@ -1,37 +1,31 @@
-"""Тесты для модуля processing."""
+"""Модуль для обработки банковских операций."""
 
-import pytest
-
-from src.processing import filter_by_state, sort_by_date
+from typing import Any, Dict, List
 
 
-@pytest.fixture
-def sample_operations() -> list:
-    """Фикстура с примером данных для тестов."""
-    return [
-        {"id": 41428829, "state": "EXECUTED", "date": "2019-07-03T18:35:29.512364"},
-        {"id": 939719570, "state": "EXECUTED", "date": "2018-06-30T02:08:58.425572"},
-        {"id": 594226727, "state": "CANCELED", "date": "2018-09-12T21:27:25.241689"},
-        {"id": 615064591, "state": "CANCELED", "date": "2018-10-14T08:21:33.419441"},
-    ]
+def filter_by_state(operations: List[Dict[str, Any]], state: str = 'EXECUTED') -> List[Dict[str, Any]]:
+    """
+    Фильтрует список операций по заданному статусу.
+
+    Аргументы:
+        operations: Список словарей с данными о банковских операциях
+        state: Статус для фильтрации (по умолчанию 'EXECUTED')
+
+    Возвращает:
+        Новый список, содержащий только операции с указанным статусом
+    """
+    return [op for op in operations if op.get('state') == state]
 
 
-def test_filter_by_state_default(sample_operations: list) -> None:
-    """Тестирует фильтрацию со статусом по умолчанию (EXECUTED)."""
-    result = filter_by_state(sample_operations)
-    assert len(result) == 2
-    assert all(op["state"] == "EXECUTED" for op in result)
+def sort_by_date(operations: List[Dict[str, Any]], descending: bool = True) -> List[Dict[str, Any]]:
+    """
+    Сортирует список операций по дате.
 
+    Аргументы:
+        operations: Список словарей с данными о банковских операциях
+        descending: Порядок сортировки. True - убывание (сначала новые)
 
-def test_filter_by_state_canceled(sample_operations: list) -> None:
-    """Тестирует фильтрацию со статусом CANCELED."""
-    result = filter_by_state(sample_operations, "CANCELED")
-    assert len(result) == 2
-    assert all(op["state"] == "CANCELED" for op in result)
-
-
-def test_sort_by_date_descending(sample_operations: list) -> None:
-    """Тестирует сортировку по убыванию."""
-    result = sort_by_date(sample_operations)
-    assert result[0]["id"] == 41428829  # 2019
-    assert result[-1]["id"] == 939719570  # 2018-06
+    Возвращает:
+        Новый отсортированный список
+    """
+    return sorted(operations, key=lambda x: x.get('date', ''), reverse=descending)
