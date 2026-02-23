@@ -1,31 +1,46 @@
-"""Модуль для обработки банковских операций."""
+"""Module for processing bank operations."""
 
 from typing import Any, Dict, List
 
 
-def filter_by_state(operations: List[Dict[str, Any]], state: str = 'EXECUTED') -> List[Dict[str, Any]]:
+def filter_by_state(operations: List[Dict[str, Any]], state: str = "EXECUTED") -> List[Dict[str, Any]]:
     """
-    Фильтрует список операций по заданному статусу.
+    Filter list of operations by given state.
 
-    Аргументы:
-        operations: Список словарей с данными о банковских операциях
-        state: Статус для фильтрации (по умолчанию 'EXECUTED')
+    Args:
+        operations: List of dictionaries with bank operations data
+        state: State to filter by (default 'EXECUTED')
 
-    Возвращает:
-        Новый список, содержащий только операции с указанным статусом
+    Returns:
+        New list containing only operations with specified state
+
+    Examples:
+        >>> data = [{'id': 1, 'state': 'EXECUTED'}, {'id': 2, 'state': 'CANCELED'}]
+        >>> filter_by_state(data)
+        [{'id': 1, 'state': 'EXECUTED'}]
+        >>> filter_by_state(data, 'CANCELED')
+        [{'id': 2, 'state': 'CANCELED'}]
     """
-    return [op for op in operations if op.get('state') == state]
+    return [op for op in operations if op.get("state") == state]
 
 
 def sort_by_date(operations: List[Dict[str, Any]], descending: bool = True) -> List[Dict[str, Any]]:
     """
-    Сортирует список операций по дате.
+    Sort list of operations by date.
 
-    Аргументы:
-        operations: Список словарей с данными о банковских операциях
-        descending: Порядок сортировки. True - убывание (сначала новые)
+    Args:
+        operations: List of dictionaries with bank operations data
+        descending: Sort order. True - descending (newest first), False - ascending
 
-    Возвращает:
-        Новый отсортированный список
+    Returns:
+        New sorted list
+
+    Examples:
+        >>> data = [
+        ...     {'id': 1, 'date': '2023-01-01'},
+        ...     {'id': 2, 'date': '2023-02-01'}
+        ... ]
+        >>> sort_by_date(data)
+        [{'id': 2, 'date': '2023-02-01'}, {'id': 1, 'date': '2023-01-01'}]
     """
-    return sorted(operations, key=lambda x: x.get('date', ''), reverse=descending)
+    return sorted(operations, key=lambda x: x.get("date", ""), reverse=descending)
