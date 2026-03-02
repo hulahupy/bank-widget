@@ -37,7 +37,8 @@ wheels/
 Thumbs.db
 
 # Coverage reports
-htmlcov/
-.coverage
-.coverage.*
-*.cover
+# Coverage reports
+# htmlcov/
+# .coverage
+# .coverage.*
+# *.cover
