@@ -23,7 +23,7 @@ def mask_account_card(account_info: str) -> str:
     Raises:
         ValueError: If input string format is invalid
     """
-    parts = account_info.rsplit(' ', 1)
+    parts = account_info.rsplit(" ", 1)
 
     if len(parts) != 2:
         raise ValueError("Invalid string format. Expected: 'Type Number'")
@@ -60,18 +60,18 @@ def get_date(date_string: str) -> str:
         raise ValueError("Date string is too short")
 
     # Check for date separator
-    if '-' not in date_string:
+    if "-" not in date_string:
         raise ValueError("Invalid date format. Expected ISO format with '-'")
 
     # Check for time part (must contain 'T')
-    if 'T' not in date_string:
+    if "T" not in date_string:
         raise ValueError("Invalid date format. Expected ISO format with time part (YYYY-MM-DDThh:mm:ss)")
 
     # Extract date part (first 10 characters)
     date_part = date_string[:10]
 
     # Split into components
-    parts = date_part.split('-')
+    parts = date_part.split("-")
     if len(parts) != 3:
         raise ValueError("Invalid date format. Expected YYYY-MM-DD")
 
