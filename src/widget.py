@@ -1,39 +1,38 @@
-"""Модуль для работы с виджетом банковских операций."""
+"""Module for widget bank operations."""
 
 from src.masks import get_mask_account, get_mask_card_number
 
 
 def mask_account_card(account_info: str) -> str:
     """
-    Маскирует номер карты или счета в зависимости от типа.
+    Mask card or account number depending on the type.
 
-    Аргументы:
-        account_info (str): Строка с типом и номером карты или счета.
-            Например: "Visa Platinum 7000792289606361" или "Счет 73654108430135874305"
+    Args:
+        account_info: String with type and number of card or account.
+            Example: "Visa Platinum 7000792289606361" or "Счет 73654108430135874305"
 
-    Возвращает:
-        str: Строка с замаскированным номером.
+    Returns:
+        String with masked number.
 
-    Примеры:
+    Examples:
         >>> mask_account_card("Visa Platinum 7000792289606361")
         'Visa Platinum 7000 79** **** 6361'
         >>> mask_account_card("Счет 73654108430135874305")
         'Счет **4305'
+
+    Raises:
+        ValueError: If input string format is invalid
     """
-    # Разделяем строку на части
-    parts = account_info.rsplit(' ', 1)
+    parts = account_info.rsplit(" ", 1)
 
     if len(parts) != 2:
-        raise ValueError("Неверный формат строки. Ожидается: 'Тип Номер'")
+        raise ValueError("Invalid string format. Expected: 'Type Number'")
 
     account_type, account_number = parts
 
-    # Определяем, карта это или счет
     if account_type.lower() == "счет":
-        # Для счета используем маскировку счета
         masked_number = get_mask_account(account_number)
     else:
-        # Для карты используем маскировку карты
         masked_number = get_mask_card_number(account_number)
 
     return f"{account_type} {masked_number}"
@@ -41,23 +40,55 @@ def mask_account_card(account_info: str) -> str:
 
 def get_date(date_string: str) -> str:
     """
-    Преобразует дату из формата ISO в формат ДД.ММ.ГГГГ.
+    Convert date from ISO format to DD.MM.YYYY format.
 
-    Аргументы:
-        date_string (str): Дата в формате "2024-03-11T02:26:18.671407"
+    Args:
+        date_string: Date in format "2024-03-11T02:26:18.671407"
 
-    Возвращает:
-        str: Дата в формате "ДД.ММ.ГГГГ"
+    Returns:
+        Date in format "DD.MM.YYYY"
 
-    Примеры:
+    Examples:
         >>> get_date("2024-03-11T02:26:18.671407")
         '11.03.2024'
+
+    Raises:
+        ValueError: If date format is invalid
     """
-    # Извлекаем только дату (первые 10 символов)
+    # Check minimum length
+    if len(date_string) < 10:
+        raise ValueError("Date string is too short")
+
+    # Check for date separator
+    if "-" not in date_string:
+        raise ValueError("Invalid date format. Expected ISO format with '-'")
+
+    # Check for time part (must contain 'T')
+    if "T" not in date_string:
+        raise ValueError("Invalid date format. Expected ISO format with time part (YYYY-MM-DDThh:mm:ss)")
+
+    # Extract date part (first 10 characters)
     date_part = date_string[:10]
 
-    # Разбиваем на год, месяц, день
-    year, month, day = date_part.split('-')
+    # Split into components
+    parts = date_part.split("-")
+    if len(parts) != 3:
+        raise ValueError("Invalid date format. Expected YYYY-MM-DD")
 
-    # Возвращаем в нужном формате
+    year, month, day = parts
+
+    # Check that all parts are digits
+    if not (year.isdigit() and month.isdigit() and day.isdigit()):
+        raise ValueError("Date must contain only digits")
+
+    # Check reasonable ranges
+    month_int = int(month)
+    day_int = int(day)
+
+    if not (1 <= month_int <= 12):
+        raise ValueError("Month must be between 1 and 12")
+
+    if not (1 <= day_int <= 31):
+        raise ValueError("Day must be between 1 and 31")
+
     return f"{day}.{month}.{year}"

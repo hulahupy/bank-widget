@@ -36,5 +36,9 @@ wheels/
 .DS_Store
 Thumbs.db
 
-# Poetry
-poetry.lock
+# Coverage reports
+# Coverage reports
+# htmlcov/
+# .coverage
+# .coverage.*
+# *.cover
