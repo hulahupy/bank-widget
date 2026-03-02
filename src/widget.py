@@ -55,33 +55,40 @@ def get_date(date_string: str) -> str:
     Raises:
         ValueError: If date format is invalid
     """
-    # Проверка минимальной длины
+    # Check minimum length
     if len(date_string) < 10:
         raise ValueError("Date string is too short")
 
-    # Проверка наличия разделителя
+    # Check for date separator
     if '-' not in date_string:
         raise ValueError("Invalid date format. Expected ISO format with '-'")
 
-    # Извлекаем часть с датой (первые 10 символов)
+    # Check for time part (must contain 'T')
+    if 'T' not in date_string:
+        raise ValueError("Invalid date format. Expected ISO format with time part (YYYY-MM-DDThh:mm:ss)")
+
+    # Extract date part (first 10 characters)
     date_part = date_string[:10]
 
-    # Разбиваем на компоненты
+    # Split into components
     parts = date_part.split('-')
     if len(parts) != 3:
         raise ValueError("Invalid date format. Expected YYYY-MM-DD")
 
     year, month, day = parts
 
-    # Проверка, что все части состоят из цифр
+    # Check that all parts are digits
     if not (year.isdigit() and month.isdigit() and day.isdigit()):
         raise ValueError("Date must contain only digits")
 
-    # Проверка разумных пределов (опционально)
-    if not (1 <= int(month) <= 12):
+    # Check reasonable ranges
+    month_int = int(month)
+    day_int = int(day)
+
+    if not (1 <= month_int <= 12):
         raise ValueError("Month must be between 1 and 12")
 
-    if not (1 <= int(day) <= 31):
+    if not (1 <= day_int <= 31):
         raise ValueError("Day must be between 1 and 31")
 
     return f"{day}.{month}.{year}"
