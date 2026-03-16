@@ -21,7 +21,7 @@ def mask_account_card(account_info: str) -> str:
         'Счет **4305'
     """
     # Разделяем строку на части
-    parts = account_info.rsplit(' ', 1)
+    parts = account_info.rsplit(" ", 1)
 
     if len(parts) != 2:
         raise ValueError("Неверный формат строки. Ожидается: 'Тип Номер'")
@@ -57,7 +57,7 @@ def get_date(date_string: str) -> str:
     date_part = date_string[:10]
 
     # Разбиваем на год, месяц, день
-    year, month, day = date_part.split('-')
+    year, month, day = date_part.split("-")
 
     # Возвращаем в нужном формате
     return f"{day}.{month}.{year}"
