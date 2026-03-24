@@ -37,4 +37,8 @@ wheels/
 Thumbs.db
 
 # Poetry
-poetry.lock
+#poetry.lock
+
+# Environment variables
+.env
+.env.local
