@@ -37,4 +37,18 @@ wheels/
 Thumbs.db
 
 # Poetry
-poetry.lock
+#poetry.lock
+
+# Environment variables
+.env
+.env.local
+
+# Coverage reports
+htmlcov/
+.coverage
+.coverage.*
+*.cover
+
+# Logs
+logs/
+*.log
