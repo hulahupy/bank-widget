@@ -1,0 +1,83 @@
+[33mcommit 2ca469c89c9f784ef4370f715e0a81ef0ebb6ee3[m
+Author: Vladimir <hulahupy@gmail.com>
+Date:   Mon Feb 23 17:42:56 2026 +0300
+
+    feat: добавить модуль processing с функциями фильтрации и сортировки
+
+[1mdiff --git a/src/processing.py b/src/processing.py[m
+[1mindex e69de29..0738d80 100644[m
+[1m--- a/src/processing.py[m
+[1m+++ b/src/processing.py[m
+[36m@@ -0,0 +1,37 @@[m
+[32m+[m[32m"""Тесты для модуля processing."""[m
+[32m+[m
+[32m+[m[32mimport pytest[m
+[32m+[m
+[32m+[m[32mfrom src.processing import filter_by_state, sort_by_date[m
+[32m+[m
+[32m+[m
+[32m+[m[32m@pytest.fixture[m
+[32m+[m[32mdef sample_operations() -> list:[m
+[32m+[m[32m    """Фикстура с примером данных для тестов."""[m
+[32m+[m[32m    return [[m
+[32m+[m[32m        {"id": 41428829, "state": "EXECUTED", "date": "2019-07-03T18:35:29.512364"},[m
+[32m+[m[32m        {"id": 939719570, "state": "EXECUTED", "date": "2018-06-30T02:08:58.425572"},[m
+[32m+[m[32m        {"id": 594226727, "state": "CANCELED", "date": "2018-09-12T21:27:25.241689"},[m
+[32m+[m[32m        {"id": 615064591, "state": "CANCELED", "date": "2018-10-14T08:21:33.419441"},[m
+[32m+[m[32m    ][m
+[32m+[m
+[32m+[m
+[32m+[m[32mdef test_filter_by_state_default(sample_operations: list) -> None:[m
+[32m+[m[32m    """Тестирует фильтрацию со статусом по умолчанию (EXECUTED)."""[m
+[32m+[m[32m    result = filter_by_state(sample_operations)[m
+[32m+[m[32m    assert len(result) == 2[m
+[32m+[m[32m    assert all(op["state"] == "EXECUTED" for op in result)[m
+[32m+[m
+[32m+[m
+[32m+[m[32mdef test_filter_by_state_canceled(sample_operations: list) -> None:[m
+[32m+[m[32m    """Тестирует фильтрацию со статусом CANCELED."""[m
+[32m+[m[32m    result = filter_by_state(sample_operations, "CANCELED")[m
+[32m+[m[32m    assert len(result) == 2[m
+[32m+[m[32m    assert all(op["state"] == "CANCELED" for op in result)[m
+[32m+[m
+[32m+[m
+[32m+[m[32mdef test_sort_by_date_descending(sample_operations: list) -> None:[m
+[32m+[m[32m    """Тестирует сортировку по убыванию."""[m
+[32m+[m[32m    result = sort_by_date(sample_operations)[m
+[32m+[m[32m    assert result[0]["id"] == 41428829  # 2019[m
+[32m+[m[32m    assert result[-1]["id"] == 939719570  # 2018-06[m
+[1mdiff --git a/src/widget.py b/src/widget.py[m
+[1mindex dc8229e..2615c1b 100644[m
+[1m--- a/src/widget.py[m
+[1m+++ b/src/widget.py[m
+[36m@@ -21,7 +21,7 @@[m [mdef mask_account_card(account_info: str) -> str:[m
+         'Счет **4305'[m
+     """[m
+     # Разделяем строку на части[m
+[31m-    parts = account_info.rsplit(' ', 1)[m
+[32m+[m[32m    parts = account_info.rsplit(" ", 1)[m
+ [m
+     if len(parts) != 2:[m
+         raise ValueError("Неверный формат строки. Ожидается: 'Тип Номер'")[m
+[36m@@ -57,7 +57,7 @@[m [mdef get_date(date_string: str) -> str:[m
+     date_part = date_string[:10][m
+ [m
+     # Разбиваем на год, месяц, день[m
+[31m-    year, month, day = date_part.split('-')[m
+[32m+[m[32m    year, month, day = date_part.split("-")[m
+ [m
+     # Возвращаем в нужном формате[m
+[31m-    return f"{day}.{month}.{year}"[m
+\ No newline at end of file[m
+[32m+[m[32m    return f"{day}.{month}.{year}"[m
+[1mdiff --git a/tests/test_widget.py b/tests/test_widget.py[m
+[1mindex 2b7551b..4a74dba 100644[m
+[1m--- a/tests/test_widget.py[m
+[1m+++ b/tests/test_widget.py[m
+[36m@@ -50,4 +50,4 @@[m [mdef test_get_date_new_year() -> None:[m
+ def test_mask_account_card_invalid_format() -> None:[m
+     """Тестирует обработку неверного формата."""[m
+     with pytest.raises(ValueError):[m
+[31m-        mask_account_card("НеправильныйФормат")[m
+\ No newline at end of file[m
+[32m+[m[32m        mask_account_card("НеправильныйФормат")[m
