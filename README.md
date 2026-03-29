@@ -11,10 +11,11 @@
 - Фильтрации и сортировки операций по различным критериям
 - Генерации данных для работы с транзакциями
 - Логирования вызовов функций с помощью декоратора
-- Чтения данных из JSON-файлов
+- Чтения данных из JSON, CSV и Excel файлов
 - Конвертации валют (USD, EUR) в рубли через внешнее API
-- Логирования работы модулей masks и utils
-- **Чтения данных из CSV и Excel файлов**
+- Поиска транзакций по описанию с использованием регулярных выражений
+- Подсчёта операций по категориям
+- Интерактивного меню для работы с транзакциями
 
 ## Структура проекта
 mask_card_number_9_2/
@@ -34,7 +35,9 @@ mask_card_number_9_2/
 │ ├── utils.py # Утилиты (чтение JSON)
 │ ├── external_api.py # Работа с внешним API
 │ ├── logger_config.py # Настройка логирования
-│ └── file_reader.py # Чтение CSV и Excel файлов
+│ ├── file_reader.py # Чтение CSV и Excel файлов
+│ ├── search_utils.py # Поиск транзакций
+│ └── category_utils.py # Подсчёт по категориям
 ├── tests/ # Тесты
 │ ├── conftest.py # Общие фикстуры
 │ ├── test_masks.py
@@ -45,14 +48,16 @@ mask_card_number_9_2/
 │ ├── test_utils.py
 │ ├── test_external_api.py
 │ ├── test_logging.py
-│ └── test_file_reader.py
+│ ├── test_file_reader.py
+│ ├── test_search_utils.py
+│ └── test_category_utils.py
 ├── htmlcov/ # Отчет о покрытии (генерируется)
-├── main.py
+├── main.py # Главный модуль с интерфейсом
 ├── pyproject.toml
 ├── poetry.lock
 ├── .flake8
 ├── .gitignore
-├── .env.example # Шаблон переменных окружения
+├── .env.example
 └── README.md
 
 text
@@ -61,7 +66,7 @@ text
 
 ### Предварительные требования
 - Python 3.14 или выше
-- Poetry (менеджер зависимостей)
+- Poetry (менеджер зависимощений)
 
 ### Установка
 
@@ -172,11 +177,18 @@ from src.utils import read_json_file
 # Чтение транзакций из JSON-файла
 transactions = read_json_file("data/operations.json")
 print(f"Загружено {len(transactions)} транзакций")
+7. Чтение CSV и Excel файлов
 
-# Получение первой транзакции
-first = transactions[0]
-print(first["description"])
-7. Конвертация валют
+from src.file_reader import read_csv_file, read_excel_file
+
+# Чтение из CSV
+csv_transactions = read_csv_file("data/transactions.csv")
+print(f"Загружено {len(csv_transactions)} транзакций из CSV")
+
+# Чтение из Excel
+excel_transactions = read_excel_file("data/transactions_excel.xlsx")
+print(f"Загружено {len(excel_transactions)} транзакций из Excel")
+8. Конвертация валют
 
 from src.external_api import convert_to_rubles
 
@@ -188,33 +200,35 @@ transaction_usd = {
     }
 }
 amount_rub = convert_to_rubles(transaction_usd)
-print(f"Сумма в рублях: {amount_rub}")  # 100 USD * курс = сумма в рублях
+9. Поиск транзакций по описанию
 
-transaction_eur = {
-    "operationAmount": {
-        "amount": "50.00",
-        "currency": {"code": "EUR"}
-    }
-}
-amount_rub = convert_to_rubles(transaction_eur)  # 50 EUR * курс
-8. Чтение данных из CSV и Excel файлов
+from src.search_utils import search_transactions
 
-from src.file_reader import read_csv_file, read_excel_file
+# Поиск транзакций, содержащих слово "Перевод"
+found = search_transactions(transactions, "Перевод")
+print(f"Найдено {len(found)} транзакций")
+10. Подсчёт операций по категориям
 
-# Чтение из CSV
-csv_transactions = read_csv_file("data/transactions.csv")
-print(f"Загружено {len(csv_transactions)} транзакций из CSV")
+from src.category_utils import count_transactions_by_category
 
-# Чтение из Excel
-excel_transactions = read_excel_file("data/transactions_excel.xlsx")
-print(f"Загружено {len(excel_transactions)} транзакций из Excel")
-Обе функции:
+categories = ["Перевод организации", "Перевод с карты на карту", "Открытие вклада"]
+counts = count_transactions_by_category(transactions, categories)
+for category, count in counts.items():
+    print(f"{category}: {count}")
+11. Интерактивный режим (main.py)
 
-Принимают путь к файлу
+poetry run python main.py
+Программа предоставляет меню для:
 
-Возвращают список словарей с транзакциями
+Выбора источника данных (JSON, CSV, XLSX)
 
-При ошибке (файл не найден, пустой, неверный формат) возвращают пустой список
+Фильтрации по статусу
+
+Сортировки по дате
+
+Фильтрации рублевых транзакций
+
+Поиска по описанию
 
 Логирование
 В проекте реализовано логирование для модулей masks и utils с использованием библиотеки logging.
@@ -230,26 +244,7 @@ logs/utils.log — логи для модуля utils
 
 2024-03-26 19:30:00 - masks - DEBUG - Processing card number: 7000...6361
 2024-03-26 19:30:00 - masks - INFO - Successfully masked card number: 7000 79** **** 6361
-2024-03-26 19:30:01 - utils - ERROR - JSON decode error in data/operations.json: Expecting value
-Уровни логирования
-Уровень	Описание	Использование
-DEBUG	Детальная информация	Входные данные, промежуточные результаты
-INFO	Успешные операции	Успешное завершение функции
-WARNING	Предупреждения	Файл не найден, неверный формат данных
-ERROR	Ошибки	Исключения, некорректные данные
-Пример логов
-
-from src.masks import get_mask_card_number
-from src.utils import read_json_file
-
-# Логи будут записаны в logs/masks.log
-masked = get_mask_card_number("7000792289606361")
-
-# Логи будут записаны в logs/utils.log
-transactions = read_json_file("data/operations.json")
-Очистка логов
-Логи перезаписываются при каждом запуске приложения (режим 'w' в RotatingFileHandler).
-
+2024-03-26 19:30:01 - utils - ERROR - JSON decode error in data/operations.json
 Тестирование
 Запуск тестов
 
@@ -260,65 +255,20 @@ poetry run pytest
 poetry run pytest -v
 
 # Запуск конкретного тестового файла
-poetry run pytest tests/test_file_reader.py -v
+poetry run pytest tests/test_search_utils.py -v
 Покрытие кода
 
 # Запуск с измерением покрытия
 poetry run pytest --cov=src tests/
 
-# Генерация HTML-отчета о покрытии
+# Генерация HTML-отчета
 poetry run pytest --cov=src --cov-report=html tests/
-
-# Открыть отчет в браузере (Windows)
-start htmlcov/index.html
-
-# Открыть отчет в браузере (Mac/Linux)
-open htmlcov/index.html
-Фикстуры, моки и параметризация
-В проекте используются современные подходы к тестированию:
-
-Фикстуры (conftest.py)
-Общие фикстуры вынесены в файл tests/conftest.py:
-
-sample_operations - тестовые данные для обработки операций
-
-sample_transactions - тестовые данные для генераторов
-
-sample_card_numbers - примеры номеров карт
-
-sample_account_numbers - примеры номеров счетов
-
-Моки для API и файлов
-Для тестирования внешних API и файловых операций используются Mock и patch:
-
-python
-from unittest.mock import patch, MagicMock
-
-def test_read_csv_file_mock():
-    with patch('src.file_reader.pd.read_csv') as mock_read_csv:
-        mock_df = MagicMock()
-        mock_df.empty = False
-        mock_df.to_dict.return_value = [{'id': 1}]
-        mock_read_csv.return_value = mock_df
-        result = read_csv_file("any.csv")
-        assert result == [{'id': 1}]
-Пример параметризации тестов
-
-@pytest.mark.parametrize("start,stop,expected", [
-    (1, 3, ["0000 0000 0000 0001", "0000 0000 0000 0002", "0000 0000 0000 0003"]),
-    (999, 1000, ["0000 0000 0000 0999", "0000 0000 0000 1000"]),
-])
-def test_card_number_generator(start, stop, expected):
-    result = list(card_number_generator(start, stop))
-    assert result == expected
 Результаты тестирования
-✅ Более 40 тестов успешно проходят
+✅ 80 тестов успешно проходят
 
 ✅ Покрытие кода > 80%
 
 ✅ Все функции протестированы
-
-✅ Использованы фикстуры, параметризация и моки
 
 Покрытие по модулям
 
@@ -333,58 +283,29 @@ src/utils.py            12      0   100%
 src/external_api.py     20      0   100%
 src/logger_config.py    20      0   100%
 src/file_reader.py      15      0   100%
+src/search_utils.py     10      0   100%
+src/category_utils.py   12      0   100%
 ----------------------------------------
-TOTAL                  155      0   100%
+TOTAL                  177      0   100%
 Линтинг и форматирование
-Проверка стиля (Flake8)
 
+# Проверка стиля
 poetry run flake8 src/ tests/
-Форматирование (Black)
 
-# Проверка форматирования
-poetry run black --check src/ tests/
-
-# Применение форматирования
+# Форматирование
 poetry run black src/ tests/
-Сортировка импортов (isort)
-
-# Проверка сортировки
-poetry run isort --check-only src/ tests/
-
-# Применение сортировки
 poetry run isort src/ tests/
-Проверка типов (MyPy)
 
-poetry run mypy src/ tests/
+# Проверка типов
+poetry run mypy src/
 Требования к окружению
 Python: 3.14 или выше
 
 Poetry: 1.4.0 или выше
 
-Зависимости:
-
-requests - для HTTP-запросов к API
-
-python-dotenv - для работы с переменными окружения
-
-pandas - для работы с CSV и Excel файлами
-
-openpyxl - для чтения Excel файлов
-
-flake8 - линтер
-
-black - форматер
-
-isort - сортировка импортов
-
-mypy - проверка типов
-
-pytest - тестирование
-
-pytest-cov - измерение покрытия
+Зависимости: pandas, openpyxl, requests, python-dotenv
 
 Разработка
-GitFlow
 Проект использует GitFlow:
 
 main - стабильная версия
@@ -393,21 +314,6 @@ develop - основная ветка разработки
 
 feature/* - ветки для новой функциональности
 
-Создание новой функциональности
-
-# Создать feature-ветку от develop
-git checkout develop
-git pull origin develop
-git checkout -b feature/new-functionality
-
-# Внести изменения
-git add .
-git commit -m "feat: add new functionality"
-
-# Запушить на GitHub
-git push origin feature/new-functionality
-
-# Создать Pull Request в ветку develop
 Автор
 Студент курса Python-разработки
 
