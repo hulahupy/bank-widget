@@ -2,6 +2,7 @@
 Module for counting transactions by categories.
 """
 
+from collections import Counter
 from typing import Any, Dict, List
 
 
@@ -21,16 +22,16 @@ def count_transactions_by_category(transactions: List[Dict[str, Any]], categorie
         >>> count_transactions_by_category(data, ["Перевод организации"])
         {"Перевод организации": 2}
     """
-    # Initialize result dictionary with zeros
-    result: Dict[str, int] = {category: 0 for category in categories}
+    # Initialize counter with zeros for all categories
+    counter: Counter = Counter({category: 0 for category in categories})
 
     if not transactions:
-        return result
+        return dict(counter)
 
     for transaction in transactions:
         description = transaction.get("description", "")
         for category in categories:
             if category.lower() in description.lower():
-                result[category] += 1
+                counter[category] += 1
 
-    return result
+    return dict(counter)
